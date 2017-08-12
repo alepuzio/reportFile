@@ -1,91 +1,39 @@
 package net.alepuzio.reportFile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+
 import java.util.List;
 
+import net.alepuzio.reportFile.enumeration.EnumMessage;
+import net.alepuzio.reportFile.enumeration.EnumNumericConstants;
+import net.alepuzio.reportFile.io.FactoryWritingDataWay;
+import net.alepuzio.reportFile.io.VisitFileSystem;
+import net.alepuzio.reportFile.io.WritingDataInFile;
+import net.alepuzio.reportFile.logic.PopulatedArguments;
+import net.alepuzio.reportFile.logic.ProcessInputArguments;
+import net.alepuzio.reportFile.logic.SingleFile;
+
 /**
- * Hello world!
+ * Running class
  *
  */
 public class App {
 	
-	
-	private String rootPath;
-	private String extension;
-	private String reportName;
-	private String separator;
-	
-	
-    public static void main( String[] args )
-    {
-    	if(null == args || args.length < 1){
-    		System.err.println(Messages.getString("error.number.args")); //$NON-NLS-1$
-    	}else{
-    		ProcessArguments arguments = ProcessArguments.factory(args);
-        	App app = arguments.buildPath().buildExtension().buildReportname().buildSeparator().getOutput();
-        	VisitFileSystem fileSystem = new VisitFileSystem(app);
+    public static void main( String[] args ) {
+    	if(null == args || args.length < EnumNumericConstants.MIN_NUMBER_PARAMETHER.getNumber()){
+    		System.err.println(EnumMessage.AT_LEAST_1_PARAMETER.getMessage()); //$NON-NLS-1$
+    	} else {
+    		ProcessInputArguments arguments = ProcessInputArguments.factory(args);
+    		PopulatedArguments app = arguments.buildPath().buildExtension().buildReportname().buildSeparator().getOutput();
+        	VisitFileSystem fileSystem = VisitFileSystem.factory(app);
         	List<SingleFile> lista = fileSystem.readDirectory();
-        	printInFile(app, lista);
-    	}
-    	System.out.println(Messages.getString("end.program")); //$NON-NLS-1$
+        	WritingDataInFile instance = FactoryWritingDataWay.instance(app);
+        	instance.write(lista);
+      	}
+    	System.out.println(EnumMessage.ENDED_RUN.getMessage()); //$NON-NLS-1$
     }
 
-	private static void printInFile(App app, List<SingleFile> lista) {
-		PrintWriter printWriter = null;
-		try {
-			printWriter = new PrintWriter(new File(app.getReportName()));
-		
-		for(SingleFile singleFile : lista){
-			printWriter.write(singleFile.toCSV(app.getSeparator()));
-		}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		finally{
-			if(null != printWriter){
-				printWriter.close();
-			}
-		}
-	}
+	
 
-	public void setExtension(String extension) {
-		this.extension = extension;
-	}
-
-	public void setReportName(String reportName) {
-		this.reportName = reportName;
-	}
-
-	public void setSeparator(String separator) {
-		this.separator = separator;
-	}
-
-	public String getRootPath() {
-		return this.rootPath;
-	}
-
-
-	public void setRootPath(String rootPath) {
-		this.rootPath = rootPath;
-	}
-
-
-	public String getExtension() {
-		return this.extension;
-	}
-
-
-
-	public String getReportName() {
-		return this.reportName;
-	}
-
-	public String getSeparator() {
-		return this.separator;
-	}
-
-
+	
 }
 
